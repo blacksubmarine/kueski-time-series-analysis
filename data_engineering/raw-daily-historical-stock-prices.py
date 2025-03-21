@@ -76,8 +76,10 @@ output_path = os.path.join(script_dir, "stock_moving_avg.parquet")
 #     .parquet(output_path)
 # )
 
-df_result.to_parquet(output_path, mode='overwrite', index=False)
+if os.path.exists(output_path):
+    os.remove(output_path)
 
+df_result.toPandas().to_parquet(output_path, index=False)
 
 # Stop Spark
 spark.stop()
