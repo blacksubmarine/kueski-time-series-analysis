@@ -67,8 +67,17 @@ df_result.select("ticker", "date", "close", "moving_avg_7d").show(15)
 script_dir = os.path.dirname(os.path.abspath(__file__))
 output_path = os.path.join(script_dir, "stock_moving_avg.parquet")
 
-# Write result as Parquet
-df_result.write.mode("overwrite").parquet(output_path)
+# # Write result as Parquet
+# (
+#     df_result.coalesce(1)
+#     .write
+#     .option("mapreduce.fileoutputcommitter.marksuccessfuljobs", "false")
+#     .mode("overwrite")
+#     .parquet(output_path)
+# )
+
+df_result.to_parquet(output_path, mode='overwrite', index=False)
 
 
+# Stop Spark
 spark.stop()
