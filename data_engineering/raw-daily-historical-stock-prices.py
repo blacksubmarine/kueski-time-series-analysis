@@ -60,7 +60,7 @@ df_result = filtered.withColumn("moving_avg_7d", avg("close").over(rolling_windo
 # Show results
 df_result = (
     df_result.select(
-        "ticker", 
+        col("ticker").alias("right_ticker"), 
         "date", 
         "close", 
         "moving_avg_7d"
@@ -68,7 +68,10 @@ df_result = (
 )
 
 # Join df_result with df_stocks on ticker
-df_result = df_stocks.join(df_result, on="ticker", how="inner")
+df_result = (
+    df_stocks.join(df_result, df_stocks["ticker"] == df_result["right_ticker"], how="inner")
+    .drop("right_ticker")
+)
 
 df_result.show(15)
 
