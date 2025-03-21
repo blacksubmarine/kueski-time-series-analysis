@@ -1,17 +1,18 @@
 # PySpark Setup on Windows 11 (with Virtual Environment)
 
-This guide explains how to set up PySpark, Hadoop, and winutils.exe on Windows 11 using a virtual environment and optional Jupyter/VSCode integration.
+This guide summarizes the required setup for running PySpark with Hadoop on Windows
 
-## 1. Create and Activate Virtual Environment
+## 1. Activate the Virtual Environment
 
-    python -m venv .venv
+In PowerShell or CMD:
+
     .venv\Scripts\activate
 
 ## 2. Install Python Dependencies
 
-    pip install pyspark pandas kagglehub ipywidgets notebook
+    pip install -r requirements.txt
 
-## 3. requirements.txt
+Ensure the `requirements.txt` file includes:
 
     pyspark
     pandas
@@ -19,72 +20,55 @@ This guide explains how to set up PySpark, Hadoop, and winutils.exe on Windows 1
     ipywidgets
     notebook
 
-## 4. Set PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON (Permanent)
+## 3. Set Up Hadoop and winutils.exe
 
-Use Command Prompt to set these environment variables:
+1. Download `winutils.exe` from:
+   https://github.com/cdarlint/winutils/tree/master/hadoop-3.3.1/bin
 
-    setx PYSPARK_PYTHON "C:\Users\52562\Documents\GitHub\kueski-time-series-analysis\.venv\Scripts\python.exe"
-    setx PYSPARK_DRIVER_PYTHON "C:\Users\52562\Documents\GitHub\kueski-time-series-analysis\.venv\Scripts\python.exe"
+2. Place it in:
 
-Alternatively, set them via: System Properties > Environment Variables.
+    C:\hadoop\bin\winutils.exe
 
-## 5. Optional: Set Variables Inside Jupyter or Interactive Window
+3. Make sure the following environment variables are set. These are already defined in the `.env` file:
 
-If running code in Jupyter or the VSCode Interactive window, use:
+    HADOOP_HOME=C:\hadoop
+    PYSPARK_PYTHON=.venv\Scripts\python.exe
+    PYSPARK_DRIVER_PYTHON=.venv\Scripts\python.exe
+
+Load them into your session using:
+
+    dotenv.load_dotenv(".env")
+
+Or ensure your terminal session has these values applied.
+
+## 4. Fix Interactive Window Issues
+
+If using Jupyter notebooks or the VSCode interactive window:
+
+- Add this to the top of your notebook/script to ensure Spark uses the right Python:
 
     import os
-    os.environ["PYSPARK_PYTHON"] = r"C:\Users\52562\Documents\GitHub\kueski-time-series-analysis\.venv\Scripts\python.exe"
-    os.environ["PYSPARK_DRIVER_PYTHON"] = r"C:\Users\52562\Documents\GitHub\kueski-time-series-analysis\.venv\Scripts\python.exe"
+    os.environ["PYSPARK_PYTHON"] = r".venv\Scripts\python.exe"
+    os.environ["PYSPARK_DRIVER_PYTHON"] = r".venv\Scripts\python.exe"
 
-## 6. Fix tqdm / IProgress Warnings
+- Fix tqdm/IProgress warnings by running:
 
     pip install ipywidgets notebook
     jupyter nbextension enable --py widgetsnbextension --sys-prefix
     jupyter nbextension install --py widgetsnbextension --sys-prefix
 
-## 7. Set Up Hadoop and winutils.exe
+## 5. Run PySpark
 
-Download `winutils.exe`:
-
-1. Go to: https://github.com/cdarlint/winutils/tree/master/hadoop-3.3.1/bin
-2. Download `winutils.exe`
-3. Place it in: `C:\hadoop\bin`
-
-Then set the environment variables:
-
-    setx HADOOP_HOME "C:\hadoop"
-    setx PATH "%PATH%;C:\hadoop\bin"
-
-## 8. Test Spark Setup
+Example test:
 
     from pyspark.sql import SparkSession
 
     spark = (
         SparkSession.builder
-        .appName("Test PySpark")
+        .appName("Test")
         .master("local[*]")
         .getOrCreate()
     )
 
-    df = spark.createDataFrame([("Alice", 25), ("Bob", 30)], ["name", "age"])
+    df = spark.createDataFrame([("Alice", 25)], ["name", "age"])
     df.show()
-
-## 9. Verify Python Path Used by Spark
-
-    import sys
-    print(sys.executable)
-
-Expected output:
-
-    C:\Users\52562\Documents\GitHub\kueski-time-series-analysis\.venv\Scripts\python.exe
-
-## 10. Additional Notes
-
-- Activate venv in PowerShell: `.\.venv\Scripts\Activate`
-- Activate venv in CMD: `.venv\Scriptsctivate`
-- Deactivate venv: `deactivate`
-
-## 11. Troubleshooting
-
-- If you see "python3 not found", set `PYSPARK_PYTHON` and `PYSPARK_DRIVER_PYTHON`
-- If Spark complains about missing winutils.exe, ensure `winutils.exe` exists in `C:\hadoop\bin` and `HADOOP_HOME` is set
