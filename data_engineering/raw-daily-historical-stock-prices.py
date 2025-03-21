@@ -58,9 +58,19 @@ rolling_window = Window.partitionBy("ticker").orderBy("date").rowsBetween(-6, 0)
 df_result = filtered.withColumn("moving_avg_7d", avg("close").over(rolling_window))
 
 # Show results
-df_result.select("ticker", "date", "close", "moving_avg_7d").show(15)
+df_result = (
+    df_result.select(
+        "ticker", 
+        "date", 
+        "close", 
+        "moving_avg_7d"
+        )
+)
 
-# Clean shutdown
+# Join df_result with df_stocks on ticker
+df_result = df_stocks.join(df_result, on="ticker", how="inner")
+
+df_result.show(15)
 
 # Get current script's directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
