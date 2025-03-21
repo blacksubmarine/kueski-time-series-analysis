@@ -10,8 +10,7 @@ os.environ["PYSPARK_DRIVER_PYTHON"] = r".venv\Scripts\python.exe"
 
 # Initialize SparkSession
 spark = (
-    SparkSession.builder
-    .appName("Stock Prices with Company Info")
+    SparkSession.builder.appName("Stock Prices with Company Info")
     .master("local[*]")
     # Disable Hadoop native IO
     .config("spark.hadoop.hadoop.native.lib", "false")
